@@ -1,0 +1,9 @@
+subssl installs its program files under /opt/subssl and the launcher as
+/usr/bin/subssl. User settings, secrets and reports remain in the invoking
+user's XDG directories (~/.config/subssl and ~/.local/state/subssl).
+
+The Grafana dashboard template is installed at:
+/usr/share/doc/subssl/grafana/subssl-certificates-dashboard.json
+
+The Prometheus certificate-expiry alert rules are installed at:
+/usr/share/doc/subssl/prometheus/subssl-alerts.yml

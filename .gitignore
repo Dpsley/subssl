@@ -1,0 +1,28 @@
+# Local Python and build output
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+dist/
+build/
+
+# Local application data: never commit credentials, inventory data, or reports
+.env
+.env.*
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+secrets.json
+config.json
+hosts.json
+reports/
+logs/
+
+# Editor and OS files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

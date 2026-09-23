@@ -1,0 +1,22 @@
+groups:
+  - name: subssl-certificates
+    rules:
+      - alert: SubsslCertificateExpiresSoon
+        expr: |
+          (subssl_tls_certificate_expiry_timestamp_seconds - time() <= 3 * 24 * 60 * 60)
+          and (subssl_tls_certificate_expiry_timestamp_seconds - time() > 0)
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "SSL certificate for {{ $labels.hostname }} expires within three days"
+          description: "Certificate on {{ $labels.hostname }} ({{ $labels.ip }}:{{ $labels.port }}) expires within three days."
+
+      - alert: SubsslCertificateExpired
+        expr: subssl_tls_certificate_expiry_timestamp_seconds - time() <= 0
+        for: 15m
+        labels:
+          severity: critical
+        annotations:
+          summary: "SSL certificate for {{ $labels.hostname }} has expired"
+          description: "Certificate on {{ $labels.hostname }} ({{ $labels.ip }}:{{ $labels.port }}) is expired."

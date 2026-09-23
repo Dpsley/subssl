@@ -1,0 +1,10 @@
+Package: subssl
+Version: 2.2.3
+Section: net
+Priority: optional
+Architecture: all
+Depends: python3 (>= 3.10), python3-aiohttp, python3-dnspython, python3-cryptography
+Maintainer: subssl maintainers
+Description: NIC.RU DNS-zone based TLS certificate inventory
+ Scans enabled hostnames from a NIC.RU DNS zone, writes JSON/CSV reports,
+ and can publish TLS certificate metrics to a Prometheus Pushgateway.

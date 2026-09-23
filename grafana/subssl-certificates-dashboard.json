@@ -1,0 +1,65 @@
+{
+  "annotations": {"list": []},
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "mappings": [], "thresholds": {"mode": "absolute", "steps": [{"color": "red", "value": null}, {"color": "orange", "value": 15}, {"color": "green", "value": 30}]}, "unit": "d"}, "overrides": []},
+      "gridPos": {"h": 5, "w": 8, "x": 0, "y": 0},
+      "options": {"colorMode": "background", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
+      "targets": [{"expr": "min(subssl_tls_certificate_days_remaining{domain=\"$domain\", hostname=~\"$hostname\"})", "refId": "A"}],
+      "title": "Minimum days remaining", "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "mappings": [], "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "red", "value": 1}]}, "unit": "short"}, "overrides": []},
+      "gridPos": {"h": 5, "w": 8, "x": 8, "y": 0},
+      "options": {"colorMode": "value", "graphMode": "none", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
+      "targets": [{"expr": "sum(subssl_tls_certificate_expired{domain=\"$domain\", hostname=~\"$hostname\"})", "refId": "A"}],
+      "title": "Expired certificates", "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "mappings": [], "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "red", "value": 1}]}, "unit": "short"}, "overrides": []},
+      "gridPos": {"h": 5, "w": 8, "x": 16, "y": 0},
+      "options": {"colorMode": "value", "graphMode": "none", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
+      "targets": [{"expr": "sum(1 - subssl_tls_certificate_present{domain=\"$domain\", hostname=~\"$hostname\"})", "refId": "A"}],
+      "title": "TLS errors", "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "fieldConfig": {"defaults": {"custom": {"align": "auto", "cellOptions": {"type": "auto"}, "inspect": false}, "mappings": []}, "overrides": [{"matcher": {"id": "byName", "options": "Есть ли сертификат?"}, "properties": [{"id": "mappings", "value": [{"type": "value", "options": {"0": {"text": "✗", "color": "red"}, "1": {"text": "✓", "color": "green"}}}]}, {"id": "custom.cellOptions", "value": {"type": "color-text"}}]}]},
+      "gridPos": {"h": 12, "w": 24, "x": 0, "y": 5},
+      "options": {"cellHeight": "sm", "showHeader": true, "sortBy": [{"desc": false, "displayName": "Есть ли сертификат?"}, {"desc": false, "displayName": "Имя хоста"}]},
+      "targets": [{"expr": "subssl_tls_certificate_present{domain=\"$domain\", hostname=~\"$hostname\"}", "format": "table", "instant": true, "refId": "A"}],
+      "title": "Сертификаты по хостам",
+      "transformations": [
+        {"id": "labelsToFields", "options": {}},
+        {"id": "organize", "options": {"excludeByName": {"Time": true, "Metric": true, "__name__": true, "domain": true, "ip": true, "port": true, "job": true, "instance": true}, "indexByName": {"hostname": 0, "certificate_type": 1, "Value": 2, "tls_error": 3, "not_before": 4, "not_after": 5, "endpoint": 6}, "renameByName": {"hostname": "Имя хоста", "certificate_type": "Тип сертификата", "Value": "Есть ли сертификат?", "tls_error": "Причина TLS-ошибки", "not_before": "Дата начала сертификата", "not_after": "Дата конца сертификата", "endpoint": "IP:порт"}}}
+      ],
+      "type": "table"
+    }
+  ],
+  "refresh": "5m",
+  "schemaVersion": 39,
+  "tags": ["ssl", "tls", "certificates", "subssl"],
+  "templating": {
+    "list": [
+      {"current": {}, "hide": 0, "includeAll": false, "label": "Prometheus", "multi": false, "name": "DS_PROMETHEUS", "options": [], "query": "prometheus", "refresh": 1, "regex": "", "skipUrlSync": false, "type": "datasource"},
+      {"allValue": ".*", "current": {}, "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"}, "definition": "label_values(subssl_scan_timestamp_seconds, domain)", "hide": 0, "includeAll": false, "label": "Zone", "multi": false, "name": "domain", "options": [], "query": {"query": "label_values(subssl_scan_timestamp_seconds, domain)", "refId": "PrometheusVariableQueryEditor-VariableQuery"}, "refresh": 1, "regex": "", "skipUrlSync": false, "sort": 1, "type": "query"},
+      {"allValue": ".*", "current": {"selected": true, "text": "All", "value": "$__all"}, "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"}, "definition": "label_values(subssl_tls_certificate_present{domain=\"$domain\"}, hostname)", "hide": 0, "includeAll": true, "label": "Site / hostname", "multi": true, "name": "hostname", "options": [], "query": {"query": "label_values(subssl_tls_certificate_present{domain=\"$domain\"}, hostname)", "refId": "PrometheusVariableQueryEditor-VariableQuery"}, "refresh": 1, "regex": "", "skipUrlSync": false, "sort": 1, "type": "query"}
+    ]
+  },
+  "time": {"from": "now-30d", "to": "now"},
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "subssl — SSL certificates",
+  "uid": "subssl-certificates",
+  "version": 1,
+  "weekStart": ""
+}

@@ -1,0 +1,5 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Files: *
+Copyright: subssl maintainers
+License: Proprietary
+ No license is granted without the copyright holder's written permission.

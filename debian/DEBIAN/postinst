@@ -1,0 +1,20 @@
+#!/bin/sh
+set -eu
+
+# v2.0/v2.1 manual installations placed a launcher in /usr/local/bin, which
+# precedes /usr/bin in PATH and points at /opt/subssl/app. Remove only that
+# recognised legacy launcher; never touch a user-created file with the same name.
+legacy_launcher=/usr/local/bin/subssl
+if [ -f "$legacy_launcher" ] && grep -q '/opt/subssl/app' "$legacy_launcher"; then
+  rm -f "$legacy_launcher"
+fi
+
+# The non-root variant of the former installer used ~/.local/bin, which also
+# precedes /usr/bin. Clean only launchers with the exact former runtime layout.
+for legacy_launcher in /home/*/.local/bin/subssl; do
+  if [ -f "$legacy_launcher" ] \
+    && grep -q '/subssl/app' "$legacy_launcher" \
+    && grep -q -- '-m subssl\.cli' "$legacy_launcher"; then
+    rm -f "$legacy_launcher"
+  fi
+done
