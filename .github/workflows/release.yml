@@ -15,7 +15,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Build Debian package
-        run: ./build-deb.sh
+        run: bash ./build-deb.sh
 
       - name: Create GitHub release
         env:
