@@ -1,0 +1,42 @@
+name: Bug report
+description: Tell us what did not work as expected.
+title: "bug: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to help improve subssl. Please remove hostnames,
+        IP addresses, tokens, and other sensitive data before submitting.
+  - type: input
+    id: version
+    attributes:
+      label: subssl version
+      description: Output from `subssl --version`.
+      placeholder: "2.2.3"
+    validations:
+      required: true
+  - type: dropdown
+    id: install
+    attributes:
+      label: Installation method
+      options:
+        - Debian package
+        - install.sh
+        - pip / virtual environment
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behaviour
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behaviour and safe logs
+      description: Do not paste credentials, internal names, IP addresses, or reports.
+    validations:
+      required: true

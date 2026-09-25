@@ -1,5 +1,7 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Files: *
-Copyright: subssl maintainers
-License: Proprietary
- No license is granted without the copyright holder's written permission.
+Copyright: 2026 Dpsley
+License: Dpsley-Free-Use-1.0
+ Free to use, including for commercial and internal purposes. Redistribution,
+ modification, and derivative works require the copyright holder's written
+ permission. See the source distribution's LICENSE file for the full terms.

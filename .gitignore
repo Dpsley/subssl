@@ -6,6 +6,9 @@ __pycache__/
 venv/
 dist/
 build/
+.coverage
+coverage.xml
+htmlcov/
 
 # Local application data: never commit credentials, inventory data, or reports
 .env

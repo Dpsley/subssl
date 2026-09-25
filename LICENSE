@@ -1,6 +1,36 @@
-Copyright (c) 2026 subssl contributors
+# Dpsley Free-Use License 1.0
 
-All rights reserved.
+Copyright (c) 2026 Dpsley. All rights reserved.
 
-No license is granted for use, copying, modification, or distribution without
-the prior written permission of the copyright holder.
+## Permission to use
+
+You may download, install, and use this software at no charge, including for
+commercial and internal purposes. You may make copies that are technically
+necessary to install, run, or back up the software for your own use.
+
+## Restrictions
+
+Without prior written permission from the copyright holder, you may not:
+
+- modify, adapt, translate, reverse engineer, or create derivative works from
+  the software;
+- redistribute, publish, sublicense, sell, rent, lease, or otherwise make the
+  software or its source code available to a third party;
+- remove or alter copyright, licence, or attribution notices; or
+- use the name "Dpsley" or "subssl" to imply endorsement of another product or
+  service.
+
+## Ownership
+
+The software, its source code, documentation, and all associated intellectual
+property rights remain the exclusive property of Dpsley. This licence grants a
+limited right to use the software; it does not transfer ownership or grant any
+right not expressly stated above.
+
+## Disclaimer
+
+The software is provided "as is", without warranty of any kind, express or
+implied, including warranties of merchantability, fitness for a particular
+purpose, and non-infringement. To the maximum extent permitted by law, the
+copyright holder is not liable for any claim, damages, or other liability
+arising from the software or its use.

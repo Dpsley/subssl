@@ -7,11 +7,30 @@ name = "subssl"
 version = "2.2.3"
 description = "TLS certificate inventory and monitoring for NIC.RU DNS zones"
 requires-python = ">=3.10"
+keywords = ["tls", "ssl", "certificate", "monitoring", "prometheus", "dns", "nic-ru"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Environment :: Console",
+  "Intended Audience :: System Administrators",
+  "Operating System :: POSIX :: Linux",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: System :: Monitoring",
+  "Topic :: System :: Systems Administration",
+]
 dependencies = [
   "aiohttp>=3.9,<4",
   "dnspython>=2.6,<3",
   "cryptography>=42,<47",
 ]
+
+[project.urls]
+Homepage = "https://github.com/Dpsley/subssl"
+Repository = "https://github.com/Dpsley/subssl"
+Issues = "https://github.com/Dpsley/subssl/issues"
+Changelog = "https://github.com/Dpsley/subssl/blob/main/CHANGELOG.md"
 
 [project.scripts]
 subssl = "subssl.cli:main"

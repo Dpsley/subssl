@@ -1,61 +1,106 @@
+<div align="center">
+
 # subssl
 
-`subssl` is a self-hosted TLS certificate inventory and monitoring tool for a
-DNS zone hosted at NIC.RU. It reads the names in a zone, resolves each enabled
-hostname, opens a TLS connection, and records certificate and connection
-health. It is intended for administrators who want a repeatable inventory of
-their externally and internally reachable HTTPS endpoints.
+### Turn a DNS zone into a living TLS certificate inventory.
 
-The tool deliberately does not discover arbitrary subdomains. The DNS zone is
-the source of truth. DNS queries use the configured local resolvers first; the
-public fallback resolvers (`1.1.1.1` and `8.8.8.8`) are used only when none of
-the local resolvers returns a record.
+Scan what you actually operate. Catch expiry, broken TLS, and hostname-mismatch
+problems before your users do.
 
-## What it does
+[![Test](https://github.com/Dpsley/subssl/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Dpsley/subssl/actions/workflows/ci.yml)
+[![Debian release](https://img.shields.io/github/v/release/Dpsley/subssl?display_name=tag&label=Debian%20release)](https://github.com/Dpsley/subssl/releases)
+[![Python](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12-3776ab?logo=python&logoColor=white)](https://www.python.org/)
+[![Platform](https://img.shields.io/badge/platform-Debian%20%7C%20Ubuntu-a81d33?logo=debian&logoColor=white)](#installation)
+[![Source available](https://img.shields.io/badge/license-source--available-8b5cf6)](LICENSE)
 
-- Imports the apex and direct, non-service hostnames from a NIC.RU DNS zone.
-- Checks TLS endpoints on configurable ports and records expiry, issuer,
-  hostname matching, and connection failures.
-- Writes JSON and CSV reports locally.
-- Provides a terminal UI for configuration, hostname selection, and scheduled
-  scans.
-- Can publish metrics to a Prometheus Pushgateway. A Grafana dashboard and
-  Prometheus alert rules are included.
+[Get started](#quick-start) · [Install](#installation) · [Monitoring](#monitoring) · [Contribute](CONTRIBUTING.md)
 
-## Requirements
+</div>
 
-- Python 3.10 or newer.
-- A NIC.RU OAuth application and a NIC.RU account with read access to the DNS
-  zone.
-- On Debian or Ubuntu, `python3-venv` for the installer. Building a `.deb`
-  additionally requires `dpkg-deb`.
+> [!TIP]
+> **subssl does not guess.** Your NIC.RU DNS zone is the source of truth, so
+> scans stay useful, repeatable, and free of random internet-wide enumeration.
 
-## Install from source
+## Why subssl?
 
-Clone the repository and run the installer:
+| What you need | What subssl gives you |
+| --- | --- |
+| Know every HTTPS endpoint you own | Imports the zone apex and direct, user-facing hostnames from NIC.RU |
+| Find certificate trouble early | Checks expiry, issuer, hostname matching, and TLS connection failures |
+| Respect internal DNS | Queries your local resolvers before falling back to public DNS |
+| Keep evidence | Saves machine-readable JSON and CSV reports locally |
+| Put TLS health on the wallboard | Publishes Prometheus metrics and includes Grafana and alert-rule assets |
+| Run it without a web service | A focused terminal UI plus CLI and optional scheduled scans |
+
+## How it works
+
+```mermaid
+flowchart LR
+    zone["NIC.RU DNS zone"] --> inventory["Enabled hostname inventory"]
+    local["Local DNS resolvers"] --> resolver["DNS resolution"]
+    fallback["1.1.1.1 / 8.8.8.8\nonly when local DNS has no answer"] -. fallback .-> resolver
+    inventory --> resolver
+    resolver --> probe["TLS probes\nports you choose"]
+    probe --> reports["JSON + CSV reports"]
+    probe --> metrics["Prometheus Pushgateway"]
+    metrics --> grafana["Grafana dashboard + alerts"]
+```
+
+## Quick start
 
 ```bash
 git clone https://github.com/Dpsley/subssl.git
 cd subssl
 chmod +x install.sh
 sudo ./install.sh
+subssl
 ```
 
-This installs the application under `/opt/subssl` and the `subssl` command
-under `/usr/local/bin`. It does not modify a shell profile.
+The first launch opens the terminal UI. Add your NIC.RU zone and read-only
+credentials, select hostnames, configure local DNS if needed, and run a scan.
 
-For a per-user installation, run the same command without `sudo`:
+```bash
+# Scan using the saved configuration
+subssl scan -v
+
+# Inspect configuration status without printing secrets
+subssl status
+```
+
+## Installation
+
+### Debian / Ubuntu
+
+The installer creates an isolated runtime in `/opt/subssl` and exposes the
+`subssl` command through `/usr/local/bin`. It does not modify shell profiles.
+
+```bash
+git clone https://github.com/Dpsley/subssl.git
+cd subssl
+sudo ./install.sh
+```
+
+To install only for the current user, omit `sudo`:
 
 ```bash
 ./install.sh
 ```
 
-The command is installed in `~/.local/bin`. If that directory is not already
-on your `PATH`, add it to the startup file for the shell you actually use, then
-open a new shell:
+This puts the command in `~/.local/bin`. Add that directory to the startup file
+for the shell you actually use if it is not already on `PATH`:
 
 ```bash
 export PATH="$HOME/.local/bin:$PATH"
+```
+
+### Install a release package
+
+Every commit pushed to `main` is built on GitHub Actions and published as a
+GitHub Release with a `.deb` attachment. Download the current package from
+[Releases](https://github.com/Dpsley/subssl/releases), then install it:
+
+```bash
+sudo apt install ./subssl_2.2.3_all.deb
 ```
 
 ### Install with pip
@@ -72,72 +117,74 @@ python -m pip install .
 subssl
 ```
 
-### Debian package
+### Build the Debian package yourself
 
-Build the package from a checkout, then install the generated file:
+On a Debian-compatible build host with `dpkg-deb` available:
 
 ```bash
 ./build-deb.sh
 sudo apt install ./dist/subssl_2.2.3_all.deb
 ```
 
-Every commit pushed to `main` also creates a GitHub Release with the generated
-Debian package attached.
+## First-run checklist
 
-## First run
+1. Run `subssl` to open the configuration UI.
+2. In **NIC.RU / DNS zone settings**, add the zone name and NIC.RU OAuth
+   application and account credentials.
+3. Use the read-only scope `GET:/dns-master/.+` for the OAuth application.
+4. Configure local DNS resolvers so private or split-horizon names resolve as
+   they do in your network.
+5. Review the **Hostnames** selection and start a scan.
 
-Launch the terminal UI:
-
-```bash
-subssl
-```
-
-In **NIC.RU / DNS zone settings**, provide the zone name, NIC.RU OAuth
-application credentials, and NIC.RU account credentials. The application uses
-a read-only DNS scope (`GET:/dns-master/.+`) and stores the refresh token for
-future runs.
-
-Credentials are stored only on the machine running `subssl` in
-`~/.config/subssl/secrets.json` with `0600` permissions. The repository does
-not contain credentials, zone data, scan reports, or build artifacts.
-
-Use **Hostnames** to choose which names are scanned, and **Local DNS settings**
-to add the resolvers appropriate for your network.
-
-## Commands
-
-```bash
-# Open the configuration UI
-subssl
-
-# Run a scan using saved settings
-subssl scan -v
-
-# Show configuration status without printing secrets
-subssl status
-```
-
-Reports are written to `~/.local/state/subssl/reports/` by default.
+subssl stores credentials only on the machine running it, in
+`~/.config/subssl/secrets.json` with `0600` permissions. Reports are written to
+`~/.local/state/subssl/reports/` by default.
 
 ## Monitoring
 
 Set a Prometheus Pushgateway URL in **Automation & monitoring → Prometheus /
-Grafana delivery**. After each scan, `subssl` publishes a complete TLS metrics
-snapshot. Configure Prometheus to scrape the Pushgateway, then import
-[`grafana/subssl-certificates-dashboard.json`](grafana/subssl-certificates-dashboard.json).
+Grafana delivery**. After each scan, subssl publishes a complete TLS metrics
+snapshot.
 
-The alert rules in
-[`prometheus/subssl-alerts.yml`](prometheus/subssl-alerts.yml) define warning
-and critical alerts for certificates approaching or past expiry.
+| Asset | Purpose |
+| --- | --- |
+| [`grafana/subssl-certificates-dashboard.json`](grafana/subssl-certificates-dashboard.json) | Importable dashboard for expiry, probe status, certificate details, and hostname mismatches |
+| [`prometheus/subssl-alerts.yml`](prometheus/subssl-alerts.yml) | Warning and critical certificate-expiry alerts |
+
+Prometheus must scrape the configured Pushgateway. The resulting metrics include
+the hostname, domain, resolved endpoint, port, certificate dates, issuer type,
+and safe TLS error information.
 
 ## Security and privacy
 
-Treat the local configuration directory and report directory as sensitive: they
-may contain account credentials, internal hostnames, addresses, and endpoint
-metadata. They are excluded by `.gitignore`. Review any generated report before
-sharing it.
+subssl works with credentials and can inventory internal names and addresses.
+Treat its configuration directory and reports as sensitive operational data.
+
+- Credentials, reports, local state, virtual environments, and build output are
+  excluded by [`.gitignore`](.gitignore).
+- Never paste tokens, internal hostnames, IP addresses, reports, or full config
+  files into issues or pull requests.
+- Report vulnerabilities privately using the [security policy](SECURITY.md).
+
+## Project health
+
+- Tests run on Python 3.10, 3.11, and 3.12 for every push and pull request.
+- Release automation builds and attaches a Debian package after every push to
+  `main`.
+- Dependabot checks Python and GitHub Actions dependencies weekly.
+- Bug reports and feature proposals have structured templates to keep triage
+  fast and safe.
+
+## Contributing
+
+Issues and pull requests are welcome. Please read
+[CONTRIBUTING.md](CONTRIBUTING.md) before opening one, especially the guidance
+on removing sensitive operational data. By participating, you agree to the
+[Code of Conduct](CODE_OF_CONDUCT.md).
 
 ## License
 
-No open-source license has been granted for this repository. Contact the
-copyright holder for permission to use, copy, modify, or distribute the code.
+subssl is source-available and free to use, including for commercial and
+internal use. Copyright and all ownership remain exclusively with Dpsley;
+redistribution, modification, and derivative works require written permission.
+See [LICENSE](LICENSE).
