@@ -100,7 +100,7 @@ export PATH="$HOME/.local/bin:$PATH"
 
 Run `sudo subssl update` (or `subssl update` when using a root shell) to fetch
 and reinstall the `.deb` attached to the latest GitHub Release. The updater
-requires internet access and `apt-get`; it leaves your configuration, secrets,
+requires internet access and `apt`; it leaves your configuration, secrets,
 host selection, and reports in your home directory.
 
 ### Install a release package
