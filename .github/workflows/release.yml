@@ -15,15 +15,25 @@ jobs:
       - name: Check out source
         uses: actions/checkout@v4
 
+      - name: Determine release version
+        id: version
+        run: |
+          base_version="$(sed -n 's/^Version: *//p' debian/DEBIAN/control | head -n 1)"
+          version="${base_version}+build.${GITHUB_RUN_NUMBER}"
+          echo "value=$version" >> "$GITHUB_OUTPUT"
+
       - name: Build Debian package
+        env:
+          SUBSSL_VERSION: ${{ steps.version.outputs.value }}
         run: bash ./build-deb.sh
 
       - name: Create GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          tag="build-${GITHUB_RUN_NUMBER}"
+          version="${{ steps.version.outputs.value }}"
+          tag="subssl_${version}"
           gh release create "$tag" dist/*.deb \
             --target "$GITHUB_SHA" \
-            --title "Build $tag" \
+            --title "$tag" \
             --generate-notes
