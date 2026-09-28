@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "subssl"
-version = "2.2.3"
+version = "2.2.4"
 description = "TLS certificate inventory and monitoring for NIC.RU DNS zones"
 requires-python = ">=3.10"
 keywords = ["tls", "ssl", "certificate", "monitoring", "prometheus", "dns", "nic-ru"]

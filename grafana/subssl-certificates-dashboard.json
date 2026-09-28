@@ -10,7 +10,7 @@
     {
       "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
       "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "mappings": [], "thresholds": {"mode": "absolute", "steps": [{"color": "red", "value": null}, {"color": "orange", "value": 15}, {"color": "green", "value": 30}]}, "unit": "d"}, "overrides": []},
-      "gridPos": {"h": 5, "w": 8, "x": 0, "y": 0},
+      "gridPos": {"h": 5, "w": 6, "x": 0, "y": 0},
       "options": {"colorMode": "background", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
       "targets": [{"expr": "min(subssl_tls_certificate_days_remaining{domain=\"$domain\", hostname=~\"$hostname\"})", "refId": "A"}],
       "title": "Minimum days remaining", "type": "stat"
@@ -18,7 +18,7 @@
     {
       "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
       "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "mappings": [], "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "red", "value": 1}]}, "unit": "short"}, "overrides": []},
-      "gridPos": {"h": 5, "w": 8, "x": 8, "y": 0},
+      "gridPos": {"h": 5, "w": 6, "x": 6, "y": 0},
       "options": {"colorMode": "value", "graphMode": "none", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
       "targets": [{"expr": "sum(subssl_tls_certificate_expired{domain=\"$domain\", hostname=~\"$hostname\"})", "refId": "A"}],
       "title": "Expired certificates", "type": "stat"
@@ -26,10 +26,19 @@
     {
       "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
       "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "mappings": [], "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "red", "value": 1}]}, "unit": "short"}, "overrides": []},
-      "gridPos": {"h": 5, "w": 8, "x": 16, "y": 0},
+      "gridPos": {"h": 5, "w": 6, "x": 12, "y": 0},
       "options": {"colorMode": "value", "graphMode": "none", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
       "targets": [{"expr": "sum(1 - subssl_tls_certificate_present{domain=\"$domain\", hostname=~\"$hostname\"})", "refId": "A"}],
       "title": "TLS errors", "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
+      "description": "Time when subssl completed its most recent scan and pushed metrics to Pushgateway.",
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "mappings": [], "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}, "unit": "dateTimeAsIso"}, "overrides": []},
+      "gridPos": {"h": 5, "w": 6, "x": 18, "y": 0},
+      "options": {"colorMode": "value", "graphMode": "none", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "value"},
+      "targets": [{"expr": "max(subssl_scan_timestamp_seconds{domain=\"$domain\"}) * 1000", "refId": "A"}],
+      "title": "Last scan completed", "type": "stat"
     },
     {
       "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},

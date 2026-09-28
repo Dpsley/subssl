@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.2.4
+
+- Added the last successful scan timestamp to the Grafana dashboard.
+- Added `subssl update` to download and reinstall the latest Debian release.
+- Restricted direct pushes to `main` to the repository owner.
+
 ## 2.2.3
 
 - Grafana: table displays the precise TLS probe error and no longer shows hostname-mismatch status.

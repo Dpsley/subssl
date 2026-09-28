@@ -65,6 +65,9 @@ subssl scan -v
 
 # Inspect configuration status without printing secrets
 subssl status
+
+# Download and install the latest published Debian package
+sudo subssl update
 ```
 
 ## Installation
@@ -93,6 +96,13 @@ for the shell you actually use if it is not already on `PATH`:
 export PATH="$HOME/.local/bin:$PATH"
 ```
 
+### Update an installed Debian package
+
+Run `sudo subssl update` (or `subssl update` when using a root shell) to fetch
+and reinstall the `.deb` attached to the latest GitHub Release. The updater
+requires internet access and `apt-get`; it leaves your configuration, secrets,
+host selection, and reports in your home directory.
+
 ### Install a release package
 
 Every commit pushed to `main` is built on GitHub Actions and published as a
@@ -100,7 +110,7 @@ GitHub Release with a `.deb` attachment. Download the current package from
 [Releases](https://github.com/Dpsley/subssl/releases), then install it:
 
 ```bash
-sudo apt install ./subssl_2.2.3_all.deb
+sudo apt install ./subssl_2.2.4_all.deb
 ```
 
 ### Install with pip
@@ -123,7 +133,7 @@ On a Debian-compatible build host with `dpkg-deb` available:
 
 ```bash
 ./build-deb.sh
-sudo apt install ./dist/subssl_2.2.3_all.deb
+sudo apt install ./dist/subssl_2.2.4_all.deb
 ```
 
 ## First-run checklist

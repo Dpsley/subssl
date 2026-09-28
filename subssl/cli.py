@@ -11,6 +11,7 @@ from .nicru import NicRuError
 from .scanner import run_scan
 from .scheduler import describe_schedule
 from .tui import launch_gui
+from .update import update_application
 
 
 def build_parser():
@@ -23,6 +24,7 @@ def build_parser():
     scan.add_argument("-o", "--output", type=Path, help="output basename (without .json/.csv)")
     scan.add_argument("--scheduled", action="store_true", help=argparse.SUPPRESS)
     sub.add_parser("status", help="show configuration/status without secrets")
+    sub.add_parser("update", help="download and install the latest Debian package")
     return p
 
 
@@ -54,6 +56,8 @@ def main():
         return launch_gui()
     if args.command == "status":
         return cmd_status()
+    if args.command == "update":
+        return update_application()
     if args.command == "scan":
         cfg, sec = Config.load(), Secrets.load()
         try:

@@ -3,7 +3,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-VERSION="2.2.3"
+VERSION="2.2.4"
 PACKAGE="subssl_${VERSION}_all.deb"
 STAGE="$(mktemp -d)"
 DEST="$ROOT/dist/$PACKAGE"
