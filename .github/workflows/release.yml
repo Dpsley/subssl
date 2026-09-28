@@ -17,9 +17,24 @@ jobs:
 
       - name: Determine release version
         id: version
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           base_version="$(sed -n 's/^Version: *//p' debian/DEBIAN/control | head -n 1)"
-          version="${base_version}+build.${GITHUB_RUN_NUMBER}"
+          latest_tag="$(gh release list --limit 1 --json tagName --jq '.[0].tagName // ""')"
+          latest_version="${latest_tag#subssl_}"
+          if [[ "$latest_tag" == "$latest_version" ]]; then
+            version="$base_version"
+          elif dpkg --compare-versions "$base_version" gt "$latest_version"; then
+            version="$base_version"
+          else
+            IFS=. read -r major minor patch <<< "$latest_version"
+            version="$major.$minor.$((patch + 1))"
+          fi
+          if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Invalid release version: $version" >&2
+            exit 1
+          fi
           echo "value=$version" >> "$GITHUB_OUTPUT"
 
       - name: Build Debian package
