@@ -6,6 +6,7 @@
   <title>subssl — TLS Certificate Inventory & Monitoring for NIC.RU DNS Zones</title>
   <meta name="description" content="subssl is a TLS certificate inventory and monitoring tool for NIC.RU DNS zones. Detect certificate expiry, hostname mismatches, TLS failures, and export Prometheus/Grafana-ready metrics.">
   <meta name="robots" content="index,follow">
+  <meta name="theme-color" content="#071019">
   <link rel="canonical" href="https://dpsley.github.io/subssl/">
   <meta property="og:type" content="website">
   <meta property="og:title" content="subssl — TLS Certificate Inventory & Monitoring">
@@ -13,51 +14,354 @@
   <meta property="og:url" content="https://dpsley.github.io/subssl/">
   <meta name="twitter:card" content="summary">
   <style>
-    :root{color-scheme:dark;--bg:#0b1020;--card:#121a2d;--text:#eef4ff;--muted:#aebbd3;--line:#26324d;--accent:#7dd3fc}
-    *{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#0b1020,#0d1324);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.6}
-    main{max-width:920px;margin:0 auto;padding:72px 24px}.hero{padding-bottom:36px;border-bottom:1px solid var(--line)}
-    h1{font-size:clamp(46px,8vw,82px);line-height:1;margin:0 0 18px;letter-spacing:-.04em}h2{margin-top:42px;font-size:28px}
-    p{color:var(--muted);font-size:18px}.lead{font-size:22px;max-width:780px}.tag{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:6px 11px;margin:0 8px 8px 0;color:#cfe9ff;font-size:14px}
-    .actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:26px}.btn{display:inline-block;text-decoration:none;padding:12px 16px;border-radius:10px;font-weight:700;border:1px solid var(--line);color:var(--text)}
-    .btn.primary{background:var(--accent);color:#072033;border-color:transparent}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-top:20px}.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px}
-    .card h3{margin:0 0 8px}.card p{font-size:15px;margin:0}code,pre{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}pre{background:#080d18;border:1px solid var(--line);padding:16px;border-radius:12px;overflow:auto;color:#d9efff}
-    footer{margin-top:54px;padding-top:24px;border-top:1px solid var(--line);color:var(--muted);font-size:14px}
+    :root{
+      color-scheme:dark;
+      --bg:#071019;
+      --bg-2:#0a1420;
+      --panel:rgba(11,24,36,.78);
+      --panel-strong:#0d1a27;
+      --line:rgba(128,184,219,.18);
+      --line-strong:rgba(91,221,186,.3);
+      --text:#f4f8fb;
+      --muted:#98a9b8;
+      --muted-2:#6f8496;
+      --green:#5ce6a7;
+      --cyan:#46c8ff;
+      --blue:#5995ff;
+      --yellow:#f6bb45;
+      --red:#ff6262;
+      --shadow:0 24px 80px rgba(0,0,0,.28);
+      --radius:18px;
+      --max:1220px;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      color:var(--text);
+      background:
+        radial-gradient(circle at 78% 12%,rgba(30,183,255,.10),transparent 28%),
+        radial-gradient(circle at 18% 74%,rgba(70,230,167,.055),transparent 28%),
+        linear-gradient(180deg,#071019 0%,#08121d 48%,#071019 100%);
+      font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      -webkit-font-smoothing:antialiased;
+    }
+
+    body:before{
+      content:"";
+      position:fixed;inset:0;pointer-events:none;opacity:.24;
+      background-image:radial-gradient(rgba(113,173,210,.28) .6px,transparent .6px);
+      background-size:28px 28px;
+      mask-image:linear-gradient(to bottom,transparent 0%,#000 12%,#000 62%,transparent 88%);
+    }
+
+    a{color:inherit}
+    .wrap{width:min(var(--max),calc(100% - 40px));margin:0 auto}
+    .nav{
+      position:sticky;top:0;z-index:20;
+      border-bottom:1px solid rgba(118,161,190,.12);
+      background:rgba(5,14,22,.76);
+      backdrop-filter:blur(18px);
+    }
+    .nav-inner{min-height:70px;display:flex;align-items:center;gap:30px}
+    .brand{display:flex;align-items:center;gap:11px;text-decoration:none;font-weight:800;font-size:22px;letter-spacing:-.025em}
+    .brand-mark{
+      width:28px;height:28px;border-radius:8px;display:grid;place-items:center;
+      background:linear-gradient(135deg,var(--green),var(--cyan));color:#042018;
+      box-shadow:0 0 26px rgba(92,230,167,.17);
+      font-weight:900;font-size:16px;
+    }
+    .nav-links{display:flex;align-items:center;gap:25px;margin-left:18px}
+    .nav-links a,.nav-actions a{font-size:14px;text-decoration:none;color:#dce8ef;font-weight:650}
+    .nav-links a:hover,.nav-actions a:hover{color:#fff}
+    .nav-actions{margin-left:auto;display:flex;align-items:center;gap:18px}
+    .github-link{display:flex;gap:8px;align-items:center}
+    .nav-cta{
+      padding:10px 15px;border-radius:10px;
+      background:linear-gradient(110deg,var(--green),var(--cyan));
+      color:#03171b!important;
+      box-shadow:0 8px 30px rgba(70,200,255,.16);
+    }
+
+    main{overflow:hidden}
+    .hero{padding:86px 0 58px}
+    .hero-grid{display:grid;grid-template-columns:1.02fr .98fr;gap:64px;align-items:center}
+    .eyebrow{
+      display:flex;align-items:center;gap:10px;
+      color:#b7c8d4;font-size:12px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;
+    }
+    .eyebrow:before{content:"";width:28px;height:1px;background:linear-gradient(90deg,var(--green),var(--cyan))}
+    .hero h1{
+      margin:16px 0 9px;
+      font-size:clamp(64px,8vw,104px);line-height:.91;letter-spacing:-.065em;
+      background:linear-gradient(105deg,var(--green) 4%,var(--cyan) 58%,#6e7cff 100%);
+      -webkit-background-clip:text;background-clip:text;color:transparent;
+    }
+    .hero h2{
+      margin:0;max-width:700px;font-size:clamp(30px,4.4vw,50px);line-height:1.08;letter-spacing:-.043em;
+    }
+    .lead{max-width:700px;margin:22px 0 0;color:#a9bac7;font-size:18px;line-height:1.65}
+    .hero-actions{display:flex;gap:14px;flex-wrap:wrap;margin-top:31px}
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;gap:9px;
+      min-height:48px;padding:0 20px;border-radius:12px;text-decoration:none;
+      border:1px solid var(--line);font-weight:800;font-size:15px;
+      transition:.2s ease;
+    }
+    .btn:hover{transform:translateY(-1px);border-color:rgba(108,206,255,.35)}
+    .btn-primary{background:linear-gradient(110deg,var(--green),var(--cyan));color:#03161c;border:0}
+    .btn-secondary{background:rgba(9,20,31,.6)}
+    .stack-row{display:flex;gap:22px;flex-wrap:wrap;margin-top:24px;color:#91a4b3;font-size:13px}
+    .stack-row span{display:flex;align-items:center;gap:8px}
+    .dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 16px rgba(92,230,167,.65)}
+
+    .terminal{
+      position:relative;border:1px solid var(--line-strong);border-radius:18px;
+      background:linear-gradient(180deg,rgba(8,22,31,.95),rgba(4,13,20,.96));
+      box-shadow:var(--shadow),0 0 60px rgba(70,200,255,.055);
+      overflow:hidden;
+    }
+    .terminal:after{
+      content:"";position:absolute;inset:-1px;pointer-events:none;
+      background:linear-gradient(120deg,transparent 60%,rgba(92,230,167,.05),transparent 85%);
+    }
+    .terminal-bar{height:48px;border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 16px;gap:9px;color:#9bb0bd;font:13px ui-monospace,SFMono-Regular,Menlo,monospace}
+    .win-dot{width:11px;height:11px;border-radius:50%}
+    .r{background:#ff625e}.y{background:#ffbd44}.g{background:#00ca4e}
+    .terminal-command{margin-left:8px;color:#a7b9c4}
+    .terminal-body{padding:21px 23px 24px;font:13px/1.75 ui-monospace,SFMono-Regular,Menlo,monospace}
+    .term-head,.term-row{display:grid;grid-template-columns:1.4fr 1.15fr 1.05fr .9fr;gap:14px}
+    .term-head{color:#758b9b;font-size:11px;letter-spacing:.06em;margin-bottom:8px}
+    .term-row{color:#c5d2da}.status{font-weight:800}.ok{color:var(--green)}.warn{color:var(--yellow)}.bad{color:var(--red)}
+    .term-divider{height:1px;background:var(--line);margin:18px 0 12px}
+    .term-summary{display:flex;gap:22px;flex-wrap:wrap;color:#8fa4b3}
+    .term-summary b{font-weight:800}
+
+    .features{padding:10px 0 70px}
+    .card-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+    .card{
+      min-height:170px;padding:23px;border:1px solid var(--line);border-radius:16px;
+      background:linear-gradient(180deg,rgba(11,24,36,.76),rgba(8,18,28,.76));
+      transition:.22s ease;
+    }
+    .card:hover{transform:translateY(-3px);border-color:rgba(92,230,167,.28);background:linear-gradient(180deg,rgba(14,29,42,.9),rgba(8,18,28,.88))}
+    .icon{
+      width:42px;height:42px;border-radius:12px;display:grid;place-items:center;margin-bottom:18px;
+      border:1px solid rgba(86,215,199,.24);background:rgba(55,177,191,.08);
+      color:#63e6c2;font-size:19px;font-weight:900;
+    }
+    .card h3{margin:0 0 9px;font-size:17px}
+    .card p{margin:0;color:var(--muted);font-size:14px;line-height:1.55}
+
+    .section{padding:66px 0;border-top:1px solid rgba(120,168,197,.11)}
+    .section-head{display:flex;justify-content:space-between;gap:30px;align-items:end;margin-bottom:38px}
+    .kicker{color:var(--green);font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase}
+    .section h2{margin:8px 0 0;font-size:clamp(30px,4vw,44px);letter-spacing:-.04em}
+    .section-copy{max-width:590px;color:var(--muted);line-height:1.65}
+
+    .flow{display:grid;grid-template-columns:repeat(4,1fr);gap:24px}
+    .step{position:relative;text-align:center;padding:10px}
+    .step:not(:last-child):after{
+      content:"→";position:absolute;right:-20px;top:25px;color:#5f8094;font-size:25px;
+    }
+    .step-badge{
+      width:58px;height:58px;margin:0 auto 18px;border-radius:16px;display:grid;place-items:center;
+      border:1px solid rgba(70,200,255,.22);background:rgba(40,150,190,.07);color:#6ee8cc;font-size:23px
+    }
+    .step:nth-child(3) .step-badge,.step:nth-child(4) .step-badge{color:#6f9dff}
+    .step h3{margin:0 0 8px;font-size:16px}
+    .step p{margin:0;color:var(--muted);font-size:13px;line-height:1.55}
+
+    .ops-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:stretch}
+    .ops-panel{
+      border:1px solid var(--line);border-radius:18px;background:var(--panel);padding:25px;
+    }
+    .ops-panel h3{margin:0 0 8px;font-size:22px}
+    .ops-panel>p{margin:0 0 21px;color:var(--muted);font-size:14px}
+    .integration-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .integration{
+      min-height:100px;border:1px solid var(--line);border-radius:14px;padding:18px;
+      background:rgba(5,15,24,.5)
+    }
+    .integration strong{display:block;margin-bottom:7px}
+    .integration small{color:var(--muted);line-height:1.5}
+    .prom{color:#ff6a42}.graf{color:#ffa225}
+    .codebox{
+      margin-top:18px;border:1px solid var(--line);border-radius:14px;background:#06101a;
+      overflow:auto;padding:16px 18px;color:#c9d8e0;font:13px/1.85 ui-monospace,SFMono-Regular,Menlo,monospace
+    }
+    .codebox .prompt{color:var(--green)}
+    .text-link{display:inline-flex;margin-top:14px;text-decoration:none;color:var(--cyan);font-size:14px;font-weight:700}
+
+    .production{
+      margin:0 0 72px;padding:29px 30px;border:1px solid rgba(81,202,214,.20);border-radius:18px;
+      background:
+        radial-gradient(circle at 78% 40%,rgba(68,157,255,.10),transparent 28%),
+        linear-gradient(110deg,rgba(9,25,36,.94),rgba(8,19,30,.9));
+      display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center;
+    }
+    .production h2{margin:7px 0 10px;font-size:30px;letter-spacing:-.03em}
+    .production p{margin:0;color:var(--muted);max-width:570px}
+    .checks{display:grid;gap:11px;color:#c9d7df;font-size:14px}
+    .check{display:flex;align-items:center;gap:10px}
+    .check:before{content:"✓";width:20px;height:20px;border-radius:50%;display:grid;place-items:center;background:var(--green);color:#052118;font-size:12px;font-weight:900}
+
+    footer{border-top:1px solid rgba(121,165,194,.12);padding:30px 0 45px;color:#748999;font-size:13px}
+    .footer-inner{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+    footer a{text-decoration:none;color:#9db1bf}
+
+    @media (max-width:980px){
+      .nav-links{display:none}
+      .hero-grid,.ops-grid,.production{grid-template-columns:1fr}
+      .hero{padding-top:60px}.hero-grid{gap:42px}
+      .card-grid{grid-template-columns:1fr 1fr}
+      .flow{grid-template-columns:1fr 1fr}
+      .step:not(:last-child):after{display:none}
+    }
+    @media (max-width:640px){
+      .wrap{width:min(100% - 28px,var(--max))}
+      .nav-inner{min-height:62px}.github-link{display:none}
+      .hero{padding:48px 0 42px}.hero h1{font-size:64px}.hero h2{font-size:34px}
+      .lead{font-size:16px}
+      .card-grid,.flow,.integration-row{grid-template-columns:1fr}
+      .card{min-height:auto}
+      .section{padding:52px 0}.section-head{display:block}
+      .terminal-body{padding:16px;font-size:11px}
+      .term-head,.term-row{grid-template-columns:1.35fr 1fr .95fr}
+      .term-head span:nth-child(2),.term-row span:nth-child(2){display:none}
+      .production{padding:24px}
+    }
   </style>
 </head>
 <body>
-<main>
-  <section class="hero">
-    <div class="tag">TLS monitoring</div><div class="tag">NIC.RU DNS</div><div class="tag">Prometheus</div><div class="tag">Grafana</div>
-    <h1>subssl</h1>
-    <p class="lead"><strong>TLS certificate inventory and monitoring for NIC.RU DNS zones.</strong> Build an inventory from the DNS zone you actually operate, then detect certificate expiry, hostname mismatches, connection failures, and other TLS problems before users do.</p>
-    <div class="actions">
-      <a class="btn primary" href="https://github.com/Dpsley/subssl">View on GitHub</a>
-      <a class="btn" href="https://github.com/Dpsley/subssl#quick-start">Quick start</a>
-      <a class="btn" href="https://github.com/Dpsley/subssl/releases">Releases</a>
+  <header class="nav">
+    <div class="wrap nav-inner">
+      <a class="brand" href="#top" aria-label="subssl home"><span class="brand-mark">S</span>subssl</a>
+      <nav class="nav-links" aria-label="Primary navigation">
+        <a href="#features">Features</a>
+        <a href="#how">How it works</a>
+        <a href="#installation">Installation</a>
+        <a href="#monitoring">Monitoring</a>
+      </nav>
+      <div class="nav-actions">
+        <a class="github-link" href="https://github.com/Dpsley/subssl" rel="noopener">GitHub ↗</a>
+        <a class="nav-cta" href="#installation">Get started →</a>
+      </div>
     </div>
-  </section>
+  </header>
 
-  <h2>What subssl does</h2>
-  <div class="grid">
-    <div class="card"><h3>DNS-driven inventory</h3><p>Uses your NIC.RU DNS zone as the source of truth instead of performing random internet-wide hostname enumeration.</p></div>
-    <div class="card"><h3>TLS health checks</h3><p>Checks certificate expiry, issuer details, hostname matching, and TLS connection failures on the ports you choose.</p></div>
-    <div class="card"><h3>Internal DNS support</h3><p>Queries local resolvers first, then falls back to public DNS when local resolution has no answer.</p></div>
-    <div class="card"><h3>Monitoring outputs</h3><p>Exports JSON and CSV reports, publishes Prometheus metrics, and includes Grafana dashboard and alert assets.</p></div>
-  </div>
+  <main id="top">
+    <section class="hero">
+      <div class="wrap hero-grid">
+        <div>
+          <div class="eyebrow">TLS visibility for your DNS infrastructure</div>
+          <h1>subssl</h1>
+          <h2>TLS certificate inventory and monitoring for NIC.RU DNS zones.</h2>
+          <p class="lead">Discover the hostnames you actually operate, inspect their TLS/SSL certificates, and catch expiry, hostname mismatch, and connection problems before users do.</p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="https://github.com/Dpsley/subssl">◉ View on GitHub</a>
+            <a class="btn btn-secondary" href="#installation">Quick start →</a>
+          </div>
+          <div class="stack-row" aria-label="Project technologies">
+            <span><i class="dot"></i>Source available</span>
+            <span>◆ Python</span>
+            <span>● Prometheus</span>
+            <span>◉ Grafana</span>
+            <span>◇ Debian / Ubuntu</span>
+          </div>
+        </div>
 
-  <h2>Install</h2>
-  <pre><code>git clone https://github.com/Dpsley/subssl.git
-cd subssl
-chmod +x install.sh
-sudo ./install.sh
-subssl</code></pre>
+        <div class="terminal" aria-label="Example subssl scan output">
+          <div class="terminal-bar">
+            <span class="win-dot r"></span><span class="win-dot y"></span><span class="win-dot g"></span>
+            <span class="terminal-command">$ subssl scan example.ru</span>
+          </div>
+          <div class="terminal-body">
+            <div class="term-head"><span>HOSTNAME</span><span>CERTIFICATE</span><span>EXPIRES</span><span>STATUS</span></div>
+            <div class="term-row"><span>example.ru</span><span>Let's Encrypt</span><span>2026-12-11</span><span class="status ok">● OK</span></div>
+            <div class="term-row"><span>www.example.ru</span><span>Let's Encrypt</span><span>2026-12-11</span><span class="status ok">● OK</span></div>
+            <div class="term-row"><span>api.example.ru</span><span>R3</span><span>2026-11-02</span><span class="status warn">▲ 21 days</span></div>
+            <div class="term-row"><span>mail.example.ru</span><span>—</span><span>—</span><span class="status bad">× Failed</span></div>
+            <div class="term-row"><span>old.example.ru</span><span>DigiCert</span><span>2026-09-18</span><span class="status bad">× Expired</span></div>
+            <div class="term-divider"></div>
+            <div>Scanned 32 hostnames in 18.4 seconds</div>
+            <div class="term-summary"><b class="ok">● 26 OK</b><b class="warn">● 3 expiring</b><b class="bad">● 3 issues</b></div>
+          </div>
+        </div>
+      </div>
+    </section>
 
-  <h2>Designed for operational TLS visibility</h2>
-  <p>subssl is intended for operators who want a repeatable TLS/SSL certificate inventory tied directly to the DNS names they manage. It is especially useful when certificate monitoring must cover both public and split-horizon or internal DNS names while still feeding existing Prometheus and Grafana workflows.</p>
+    <section class="features" id="features">
+      <div class="wrap card-grid">
+        <article class="card"><div class="icon">⌕</div><h3>Complete visibility</h3><p>Build a TLS inventory directly from the apex and user-facing hostnames in your NIC.RU DNS zone.</p></article>
+        <article class="card"><div class="icon">◇</div><h3>Catch problems early</h3><p>Detect expiry, hostname mismatches, issuer details, and TLS connection failures before they become outages.</p></article>
+        <article class="card"><div class="icon">▥</div><h3>Metrics for your stack</h3><p>Publish a complete TLS snapshot to Prometheus Pushgateway and visualize certificate health in Grafana.</p></article>
+        <article class="card"><div class="icon">⚙</div><h3>Built for real infrastructure</h3><p>Supports local DNS resolvers first, JSON/CSV evidence, scheduled scans, and Debian or Ubuntu deployment.</p></article>
+      </div>
+    </section>
+
+    <section class="section" id="how">
+      <div class="wrap">
+        <div class="section-head">
+          <div><div class="kicker">How it works</div><h2>From DNS zone to TLS visibility</h2></div>
+          <p class="section-copy">subssl uses the DNS zone you manage as its source of truth, resolves hosts as your environment does, probes TLS, and feeds the resulting health data into monitoring.</p>
+        </div>
+        <div class="flow">
+          <div class="step"><div class="step-badge">◎</div><h3>1. Discover</h3><p>Import the zone apex and direct, user-facing hostnames from NIC.RU.</p></div>
+          <div class="step"><div class="step-badge">▤</div><h3>2. Scan TLS</h3><p>Resolve endpoints, connect on configured ports, and inspect certificate state.</p></div>
+          <div class="step"><div class="step-badge">▥</div><h3>3. Export metrics</h3><p>Write JSON/CSV reports and publish the current snapshot to Prometheus.</p></div>
+          <div class="step"><div class="step-badge">♢</div><h3>4. Get alerted</h3><p>Use Grafana and bundled alert rules to surface expiry and TLS issues.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="monitoring">
+      <div class="wrap ops-grid">
+        <div class="ops-panel">
+          <div class="kicker">Monitoring stack</div>
+          <h3>Works with the tools you already use</h3>
+          <p>subssl publishes operational certificate data instead of locking it inside a separate web service.</p>
+          <div class="integration-row">
+            <div class="integration"><strong class="prom">● Prometheus</strong><small>Pushgateway metrics for host, endpoint, port, certificate dates, issuer type, and safe TLS errors.</small></div>
+            <div class="integration"><strong class="graf">◉ Grafana</strong><small>Bundled dashboard and alert assets for certificate expiry, probe failures, and hostname mismatch visibility.</small></div>
+          </div>
+        </div>
+
+        <div class="ops-panel" id="installation">
+          <div class="kicker">Installation</div>
+          <h3>Quick start on Debian / Ubuntu</h3>
+          <p>Install the isolated runtime and expose the <code>subssl</code> command system-wide.</p>
+          <div class="codebox"><span class="prompt">$</span> git clone https://github.com/Dpsley/subssl.git
+<br><span class="prompt">$</span> cd subssl
+<br><span class="prompt">$</span> chmod +x install.sh
+<br><span class="prompt">$</span> sudo ./install.sh
+<br><span class="prompt">$</span> subssl</div>
+          <a class="text-link" href="https://github.com/Dpsley/subssl#installation">Full installation guide →</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="wrap production">
+      <div>
+        <div class="kicker">Built for operational use</div>
+        <h2>Keep your TLS infrastructure healthy</h2>
+        <p>Use the DNS zone as a repeatable inventory source, retain machine-readable scan evidence, and surface certificate health in the monitoring stack your team already operates.</p>
+      </div>
+      <div class="checks">
+        <div class="check">Identify certificates approaching expiry</div>
+        <div class="check">Detect hostname mismatches and failed TLS probes</div>
+        <div class="check">Respect local DNS before public fallback resolution</div>
+        <div class="check">Deploy without running a separate web service</div>
+      </div>
+    </section>
+  </main>
 
   <footer>
-    Project: <a href="https://github.com/Dpsley/subssl" style="color:var(--accent)">github.com/Dpsley/subssl</a>
+    <div class="wrap footer-inner">
+      <span>subssl · TLS certificate inventory and monitoring for NIC.RU DNS zones</span>
+      <span><a href="https://github.com/Dpsley/subssl">GitHub</a> · <a href="https://github.com/Dpsley/subssl/releases">Releases</a> · <a href="https://github.com/Dpsley/subssl/blob/main/LICENSE">License</a></span>
+    </div>
   </footer>
-</main>
 </body>
 </html>
