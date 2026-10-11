@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>subssl — TLS Certificate Inventory & Monitoring for NIC.RU DNS Zones</title>
+  <meta name="description" content="subssl is a TLS certificate inventory and monitoring tool for NIC.RU DNS zones. Detect certificate expiry, hostname mismatches, TLS failures, and export Prometheus/Grafana-ready metrics.">
+  <meta name="robots" content="index,follow">
+  <link rel="canonical" href="https://dpsley.github.io/subssl/">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="subssl — TLS Certificate Inventory & Monitoring">
+  <meta property="og:description" content="TLS certificate inventory and monitoring for NIC.RU DNS zones.">
+  <meta property="og:url" content="https://dpsley.github.io/subssl/">
+  <meta name="twitter:card" content="summary">
+  <style>
+    :root{color-scheme:dark;--bg:#0b1020;--card:#121a2d;--text:#eef4ff;--muted:#aebbd3;--line:#26324d;--accent:#7dd3fc}
+    *{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#0b1020,#0d1324);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.6}
+    main{max-width:920px;margin:0 auto;padding:72px 24px}.hero{padding-bottom:36px;border-bottom:1px solid var(--line)}
+    h1{font-size:clamp(46px,8vw,82px);line-height:1;margin:0 0 18px;letter-spacing:-.04em}h2{margin-top:42px;font-size:28px}
+    p{color:var(--muted);font-size:18px}.lead{font-size:22px;max-width:780px}.tag{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:6px 11px;margin:0 8px 8px 0;color:#cfe9ff;font-size:14px}
+    .actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:26px}.btn{display:inline-block;text-decoration:none;padding:12px 16px;border-radius:10px;font-weight:700;border:1px solid var(--line);color:var(--text)}
+    .btn.primary{background:var(--accent);color:#072033;border-color:transparent}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-top:20px}.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px}
+    .card h3{margin:0 0 8px}.card p{font-size:15px;margin:0}code,pre{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}pre{background:#080d18;border:1px solid var(--line);padding:16px;border-radius:12px;overflow:auto;color:#d9efff}
+    footer{margin-top:54px;padding-top:24px;border-top:1px solid var(--line);color:var(--muted);font-size:14px}
+  </style>
+</head>
+<body>
+<main>
+  <section class="hero">
+    <div class="tag">TLS monitoring</div><div class="tag">NIC.RU DNS</div><div class="tag">Prometheus</div><div class="tag">Grafana</div>
+    <h1>subssl</h1>
+    <p class="lead"><strong>TLS certificate inventory and monitoring for NIC.RU DNS zones.</strong> Build an inventory from the DNS zone you actually operate, then detect certificate expiry, hostname mismatches, connection failures, and other TLS problems before users do.</p>
+    <div class="actions">
+      <a class="btn primary" href="https://github.com/Dpsley/subssl">View on GitHub</a>
+      <a class="btn" href="https://github.com/Dpsley/subssl#quick-start">Quick start</a>
+      <a class="btn" href="https://github.com/Dpsley/subssl/releases">Releases</a>
+    </div>
+  </section>
+
+  <h2>What subssl does</h2>
+  <div class="grid">
+    <div class="card"><h3>DNS-driven inventory</h3><p>Uses your NIC.RU DNS zone as the source of truth instead of performing random internet-wide hostname enumeration.</p></div>
+    <div class="card"><h3>TLS health checks</h3><p>Checks certificate expiry, issuer details, hostname matching, and TLS connection failures on the ports you choose.</p></div>
+    <div class="card"><h3>Internal DNS support</h3><p>Queries local resolvers first, with optional fallback to public DNS when local resolution has no answer.</p></div>
+    <div class="card"><h3>Monitoring outputs</h3><p>Exports JSON and CSV reports, publishes Prometheus metrics, and includes Grafana dashboard and alert assets.</p></div>
+  </div>
+
+  <h2>Install</h2>
+  <pre><code>git clone https://github.com/Dpsley/subssl.git
+cd subssl
+chmod +x install.sh
+sudo ./install.sh
+subssl</code></pre>
+
+  <h2>Designed for operational TLS visibility</h2>
+  <p>subssl is intended for operators who want a repeatable TLS/SSL certificate inventory tied directly to the DNS names they manage. It is especially useful when certificate monitoring must cover both public and split-horizon or internal DNS names while still feeding existing Prometheus and Grafana workflows.</p>
+
+  <footer>
+    Project: <a href="https://github.com/Dpsley/subssl" style="color:var(--accent)">github.com/Dpsley/subssl</a>
+  </footer>
+</main>
+</body>
+</html>

@@ -4,6 +4,8 @@
 
 ### Turn a DNS zone into a living TLS certificate inventory.
 
+**TLS certificate inventory and monitoring for NIC.RU DNS zones.**
+
 Scan what you actually operate. Catch expiry, broken TLS, and hostname-mismatch
 problems before your users do.
 
