@@ -41,7 +41,7 @@
   <div class="grid">
     <div class="card"><h3>DNS-driven inventory</h3><p>Uses your NIC.RU DNS zone as the source of truth instead of performing random internet-wide hostname enumeration.</p></div>
     <div class="card"><h3>TLS health checks</h3><p>Checks certificate expiry, issuer details, hostname matching, and TLS connection failures on the ports you choose.</p></div>
-    <div class="card"><h3>Internal DNS support</h3><p>Queries local resolvers first, with optional fallback to public DNS when local resolution has no answer.</p></div>
+    <div class="card"><h3>Internal DNS support</h3><p>Queries local resolvers first, then falls back to public DNS when local resolution has no answer.</p></div>
     <div class="card"><h3>Monitoring outputs</h3><p>Exports JSON and CSV reports, publishes Prometheus metrics, and includes Grafana dashboard and alert assets.</p></div>
   </div>
 
